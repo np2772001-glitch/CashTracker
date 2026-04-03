@@ -5,44 +5,162 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Cash Tracker</title>
 <link rel="manifest" href="manifest.json">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#1a1a1a">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: Georgia, serif; background: #f5f0e8; color: #1a1a1a; min-height: 100vh; }
-  header { background: #1a1a1a; color: #f5f0e8; padding: 1.5rem 2rem; display: flex; align-items: baseline; gap: 1rem; }
+  body { font-family: Georgia, serif; background: #f5f0e8; color: #1a1a1a; min-height: 100vh; padding-bottom: 40px; }
+  header { background: #1a1a1a; color: #f5f0e8; padding: 1.5rem 2rem; display: flex; align-items: baseline; gap: 0.8rem; }
   header h1 { font-size: 1.6rem; font-weight: normal; }
+  header span { font-family: monospace; font-size: 12px; color: #888; }
   .container { max-width: 850px; margin: 0 auto; padding: 2rem 1.25rem; }
-  .metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 2rem; }
+  
+  .metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 1.25rem; }
   .metric { background: #fff; border: 1px solid #e0d8cc; border-radius: 6px; padding: 1rem; }
-  .metric-label { font-size: 11px; text-transform: uppercase; color: #888; font-family: monospace; }
+  .metric-label { font-size: 11px; text-transform: uppercase; color: #888; font-family: monospace; margin-bottom: 5px; }
   .metric-value { font-size: 1.6rem; }
   .spent { color: #b34a00; }
+
   .card { background: #fff; border: 1px solid #e0d8cc; border-radius: 8px; padding: 1.25rem; margin-bottom: 1.25rem; }
   .card-title { font-size: 11px; text-transform: uppercase; color: #888; font-family: monospace; margin-bottom: 1rem; }
-  .form-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-end; }
-  .form-group { display: flex; flex-direction: column; gap: 5px; }
-  input, select { height: 38px; padding: 0 10px; border: 1px solid #d0c8bc; border-radius: 5px; background: #faf8f4; font-size: 14px; }
-  .btn { height: 38px; padding: 0 18px; border: 1px solid #1a1a1a; border-radius: 5px; background: #1a1a1a; color: #f5f0e8; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; }
-  .btn-outline { background: #eee !important; color: #1a1a1a !important; border: 1px solid #d0c8bc !important; font-size: 11px; font-weight: bold; }
-  .log-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 10px; }
-  .log-table td, .log-table th { padding: 9px 8px; border-bottom: 1px solid #f0ebe2; text-align: left; }
-  .cat-badge { padding: 2px 8px; border-radius: 10px; font-size: 11px; font-family: monospace; }
-  .bar-wrap { flex: 1; height: 10px; background: #ede8df; border-radius: 10px; overflow: hidden; margin: 0 10px; }
+  
+  .form-group { margin-bottom: 1rem; display: flex; flex-direction: column; gap: 5px; }
+  label { font-size: 12px; color: #666; }
+  input, select { width: 100%; height: 42px; padding: 0 10px; border: 1px solid #d0c8bc; border-radius: 5px; background: #faf8f4; font-size: 15px; }
+  
+  .btn-add { width: 100%; height: 48px; background: #1a1a1a; color: #f5f0e8; border: none; border-radius: 5px; font-size: 14px; cursor: pointer; margin-top: 5px; }
+  .btn-sub { background: #fff; color: #1a1a1a; border: 1px solid #d0c8bc; font-size: 11px; height: 38px; padding: 0 15px; border-radius: 5px; cursor: pointer; }
+
+  .log-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .log-table td { padding: 12px 0; border-bottom: 1px solid #f0ebe2; }
+  .cat-badge { padding: 3px 10px; border-radius: 12px; font-size: 11px; font-family: monospace; background: #eee; }
+  .del-x { color: #ccc; border: none; background: none; font-size: 20px; cursor: pointer; padding-left: 10px; line-height: 1; }
+
+  .breakdown-row { display: flex; align-items: center; margin-bottom: 12px; font-size: 12px; }
+  .bar-wrap { flex: 1; height: 8px; background: #ede8df; border-radius: 10px; overflow: hidden; margin: 0 12px; }
   .bar-fill { height: 100%; transition: width 0.4s; }
-  .breakdown-row { display: flex; align-items: center; margin-bottom: 10px; }
-  .del-btn { color: #ccc; border: none; background: none; cursor: pointer; font-size: 18px; padding: 0 5px; }
-  .history-item { display: flex; justify-content: space-between; font-size: 13px; padding: 8px 0; border-bottom: 1px solid #f0ebe2; }
-  @media (max-width: 600px) { .metrics { grid-template-columns: 1fr; } .form-row { flex-direction: column; align-items: stretch; } }
+
+  .history-item { display: flex; justify-content: space-between; font-size: 14px; padding: 10px 0; border-bottom: 1px solid #f0ebe2; }
+  .footer-btns { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; }
+
+  @media (max-width: 600px) { .metrics { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
 
-<header><h1>Cash Tracker</h1></header>
+<header><h1>Cash Tracker</h1> <span>where did it go?</span></header>
 
 <div class="container">
   <div class="metrics">
     <div class="metric"><div class="metric-label">Total Spent</div><div class="metric-value spent" id="total">€0.00</div></div>
     <div class="metric"><div class="metric-label">Entries</div><div class="metric-value" id="count">0</div></div>
-    <div class="metric"><div class="metric-label">Status</div><div class="metric-value" id="status" style="font-size:14px; color
+    <div class="metric"><div class="metric-label">Status</div><div class="metric-value" id="status" style="font-size:14px; color:green;">Active</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Add Expense</div>
+    <div class="form-group"><label>Date & Time</label><input type="datetime-local" id="datetime"></div>
+    <div class="form-group"><label>Amount (€)</label><input type="number" id="amount" step="0.01" placeholder="0.00"></div>
+    <div class="form-group">
+      <label>Category</label>
+      <select id="category">
+        <option value="Groceries">🛒 Groceries</option>
+        <option value="Coffee">☕ Coffee</option>
+        <option value="Tobacco">🚬 Tobacco</option>
+        <option value="Drinks">🍺 Drinks</option>
+        <option value="Random">🎲 Random</option>
+      </select>
+    </div>
+    <button class="btn-add" onclick="addEntry()">Add</button>
+  </div>
+
+  <div class="card"><div class="card-title">Spending Breakdown</div><div id="breakdown"></div></div>
+
+  <div class="card">
+    <div class="card-title">Log</div>
+    <div id="log-wrap"></div>
+    <div class="footer-btns">
+      <button onclick="clearAll()" style="color:#999; border:none; background:none; font-size:11px; cursor:pointer;">Clear All</button>
+      <div style="display:flex; gap:8px;">
+        <label class="btn-sub" style="display:flex; align-items:center; cursor:pointer;">
+          Import CSV <input type="file" accept=".csv" style="display:none;" onchange="importCSV(this)">
+        </label>
+        <button onclick="exportCSV()" class="btn-sub" style="background:#1a1a1a; color:#fff;">Export CSV</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Daily History</div>
+    <div id="daily-history"></div>
+  </div>
+</div>
+
+<script>
+const COLORS = { Groceries: '#5a8a5a', Coffee: '#c8813a', Tobacco: '#8a7a6a', Drinks: '#4a6a9a', Random: '#9a5a8a' };
+let entries = JSON.parse(localStorage.getItem('cashEntries') || '[]');
+
+function setNow() {
+  const n = new Date();
+  n.setMinutes(n.getMinutes() - n.getTimezoneOffset());
+  document.getElementById('datetime').value = n.toISOString().slice(0, 16);
+}
+
+function save() { localStorage.setItem('cashEntries', JSON.stringify(entries)); }
+
+function addEntry() {
+  const amtVal = document.getElementById('amount').value;
+  const amt = parseFloat(amtVal);
+  if (!amt) return;
+  entries.push({ id: Date.now(), amount: amt, category: document.getElementById('category').value, date: document.getElementById('datetime').value });
+  save(); document.getElementById('amount').value = ''; render();
+}
+
+function deleteEntry(id) { if (confirm("Delete entry?")) { entries = entries.filter(e => e.id !== id); save(); render(); } }
+function clearAll() { if (confirm("Delete all entries?")) { entries = []; save(); render(); } }
+
+function render() {
+  const total = entries.reduce((s, e) => s + e.amount, 0);
+  document.getElementById('total').textContent = '€' + total.toFixed(2);
+  document.getElementById('count').textContent = entries.length;
+
+  const byCat = {};
+  entries.forEach(e => byCat[e.category] = (byCat[e.category] || 0) + e.amount);
+  document.getElementById('breakdown').innerHTML = Object.keys(COLORS).map(cat => {
+    const amt = byCat[cat] || 0;
+    const pct = total > 0 ? (amt / total * 100) : 0;
+    return `<div class="breakdown-row"><span style="width:70px;">${cat}</span><div class="bar-wrap"><div class="bar-fill" style="width:${pct}%; background:${COLORS[cat]}"></div></div><span>${pct.toFixed(0)}%</span></div>`;
+  }).join('');
+
+  const sorted = [...entries].sort((a,b) => new Date(b.date) - new Date(a.date));
+  document.getElementById('log-wrap').innerHTML = `<table class="log-table">${sorted.map(e => `<tr><td>${e.date.split('T')[0]}</td><td><span class="cat-badge">${e.category}</span></td><td style="font-weight:bold; text-align:right;">€${e.amount.toFixed(2)}</td><td style="text-align:right;"><button class="del-x" onclick="deleteEntry(${e.id})">×</button></td></tr>`).join('')}</table>`;
+
+  const byDay = {};
+  entries.forEach(e => { const d = e.date.split('T')[0]; byDay[d] = (byDay[d] || 0) + e.amount; });
+  const sortedDays = Object.keys(byDay).sort().reverse();
+  document.getElementById('daily-history').innerHTML = sortedDays.map(d => `<div class="history-item"><span>${d}</span><span style="font-weight:bold;">€${byDay[d].toFixed(2)}</span></div>`).join('') || '<div style="color:#999; font-size:12px;">No history available.</div>';
+}
+
+function exportCSV() {
+  const csv = "Date,Category,Amount\n" + entries.map(e => `${e.date},${e.category},${e.amount}`).join("\n");
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' })); a.download = 'cash_tracker_backup.csv'; a.click();
+}
+
+function importCSV(input) {
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const rows = e.target.result.split('\n').slice(1).filter(r => r.trim());
+      const imported = rows.map(r => { 
+        const p = r.split(','); 
+        return { id: Date.now() + Math.random(), date: p[0].trim(), category: p[1].trim(), amount: parseFloat(p[2]) }; 
+      });
+      if(confirm(`Import ${imported.length} items?`)) { entries = [...entries, ...imported]; save(); render(); }
+    } catch(err) { alert("Invalid CSV format."); }
+  };
+  reader.readAsText(input.files[0]);
+}
+
+setNow(); render();
+</script>
+</body>
+</html>
