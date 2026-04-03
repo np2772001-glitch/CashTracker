@@ -8,7 +8,6 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#1a1a1a">
-
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: Georgia, serif; background: #f5f0e8; color: #1a1a1a; min-height: 100vh; }
@@ -57,94 +56,10 @@
     <div class="card-title">Add Expense</div>
     <div class="form-row">
       <div class="form-group fg-date"><label>Date & Time</label><input type="datetime-local" id="datetime"></div>
-      <div class="form-group fg-amount"><label>Amount (€)</label><input type="number" id="amount" step="0.01"></div>
+      <div class="form-group fg-amount"><label>Amount (€)</label><input type="number" id="amount" step="0.01" placeholder="0.00"></div>
       <div class="form-group fg-cat">
         <label>Category</label>
         <select id="category">
           <option value="Groceries">🛒 Groceries</option>
-          <option value="Coffee">☕ Coffee</option>
-          <option value="Tobacco">🚬 Tobacco</option>
-          <option value="Drinks">🍺 Drinks</option>
-          <option value="Random">🎲 Random</option>
-        </select>
-      </div>
-      <div class="form-group" style="flex:1;"><label>Note</label><input type="text" id="note" style="width:100%;"></div>
-      <button class="btn" onclick="addEntry()">Add</button>
-    </div>
-  </div>
-
-  <div class="card"><div class="card-title">Spending Breakdown</div><div id="breakdown"></div></div>
-
-  <div class="card">
-    <div class="card-title">Log</div>
-    <div id="log-wrap"></div>
-    <div style="margin-top:1rem; display:flex; gap:8px; justify-content:flex-end;">
-      <button class="btn outline" onclick="clearAll()">Clear All</button>
-      <button class="btn" onclick="exportCSV()">Export CSV</button>
-    </div>
-  </div>
-</div>
-
-<script>
-// Colors reordered to match the select menu
-const CAT_COLORS = {
-  Groceries: { bg: '#eaf3ea', text: '#2d6a2d', bar: '#5a8a5a' },
-  Coffee: { bg: '#fff3e8', text: '#8a4a00', bar: '#c8813a' },
-  Tobacco: { bg: '#f0ece6', text: '#5a4a3a', bar: '#8a7a6a' },
-  Drinks: { bg: '#e8eef6', text: '#2a4a7a', bar: '#4a6a9a' },
-  Random: { bg: '#f3eaf3', text: '#6a2a6a', bar: '#9a5a8a' }
-};
-
-let entries = JSON.parse(localStorage.getItem('cashEntries') || '[]');
-
-function setNow() {
-  const now = new Date();
-  now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-  document.getElementById('datetime').value = now.toISOString().slice(0, 16);
-}
-
-function save() { localStorage.setItem('cashEntries', JSON.stringify(entries)); }
-
-function addEntry() {
-  const amt = parseFloat(document.getElementById('amount').value);
-  if (!amt || amt <= 0) return;
-  
-  const dtValue = document.getElementById('datetime').value;
-  const dateObj = new Date(dtValue);
-  
-  const formattedDate = dateObj.toLocaleString('en-GB', {
-    day: '2-digit', month: '2-digit', year: 'numeric',
-    hour: '2-digit', minute: '2-digit', hour12: false
-  }).replace(',', '');
-
-  entries.push({
-    id: Date.now(),
-    amount: amt,
-    category: document.getElementById('category').value,
-    note: document.getElementById('note').value,
-    date: formattedDate,
-    rawDate: dtValue
-  });
-
-  save();
-  document.getElementById('amount').value = '';
-  document.getElementById('note').value = '';
-  setNow();
-  render();
-}
-
-function deleteEntry(id) { entries = entries.filter(e => e.id !== id); save(); render(); }
-function clearAll() { if(confirm('Clear all?')) { entries = []; save(); render(); } }
-
-function render() {
-  const total = entries.reduce((s, e) => s + e.amount, 0);
-  document.getElementById('total').textContent = '€' + total.toFixed(2);
-  document.getElementById('count').textContent = entries.length;
-
-  const bycat = {};
-  entries.forEach(e => bycat[e.category] = (bycat[e.category] || 0) + e.amount);
-  
-  const bd = document.getElementById('breakdown');
-  bd.innerHTML = Object.keys(CAT_COLORS).map(cat => {
-    const amt = bycat
- 
+          <option
+           
