@@ -48,7 +48,7 @@
 
 <div class="container">
   <div class="metrics">
-    <div class="metric"><div class="metric-label">Total Spent</div><div class="metric-value spent" id="total">$0.00</div></div>
+    <div class="metric"><div class="metric-label">Total Spent</div><div class="metric-value spent" id="total">€0.00</div></div>
     <div class="metric"><div class="metric-label">Entries</div><div class="metric-value" id="count">0</div></div>
     <div class="metric"><div class="metric-label">Top Category</div><div class="metric-value" id="top-cat" style="font-size:1rem;">—</div></div>
   </div>
@@ -57,12 +57,12 @@
     <div class="card-title">Add Expense</div>
     <div class="form-row">
       <div class="form-group fg-date"><label>Date & Time</label><input type="datetime-local" id="datetime"></div>
-      <div class="form-group fg-amount"><label>Amount ($)</label><input type="number" id="amount" step="0.01"></div>
+      <div class="form-group fg-amount"><label>Amount (€)</label><input type="number" id="amount" step="0.01"></div>
       <div class="form-group fg-cat">
         <label>Category</label>
         <select id="category">
-          <option value="Coffee">☕ Coffee</option>
           <option value="Groceries">🛒 Groceries</option>
+          <option value="Coffee">☕ Coffee</option>
           <option value="Tobacco">🚬 Tobacco</option>
           <option value="Drinks">🍺 Drinks</option>
           <option value="Random">🎲 Random</option>
@@ -86,9 +86,10 @@
 </div>
 
 <script>
+// Colors reordered to match the select menu
 const CAT_COLORS = {
-  Coffee: { bg: '#fff3e8', text: '#8a4a00', bar: '#c8813a' },
   Groceries: { bg: '#eaf3ea', text: '#2d6a2d', bar: '#5a8a5a' },
+  Coffee: { bg: '#fff3e8', text: '#8a4a00', bar: '#c8813a' },
   Tobacco: { bg: '#f0ece6', text: '#5a4a3a', bar: '#8a7a6a' },
   Drinks: { bg: '#e8eef6', text: '#2a4a7a', bar: '#4a6a9a' },
   Random: { bg: '#f3eaf3', text: '#6a2a6a', bar: '#9a5a8a' }
@@ -111,7 +112,6 @@ function addEntry() {
   const dtValue = document.getElementById('datetime').value;
   const dateObj = new Date(dtValue);
   
-  // European Format: DD/MM/YYYY HH:mm
   const formattedDate = dateObj.toLocaleString('en-GB', {
     day: '2-digit', month: '2-digit', year: 'numeric',
     hour: '2-digit', minute: '2-digit', hour12: false
@@ -138,7 +138,7 @@ function clearAll() { if(confirm('Clear all?')) { entries = []; save(); render()
 
 function render() {
   const total = entries.reduce((s, e) => s + e.amount, 0);
-  document.getElementById('total').textContent = '$' + total.toFixed(2);
+  document.getElementById('total').textContent = '€' + total.toFixed(2);
   document.getElementById('count').textContent = entries.length;
 
   const bycat = {};
@@ -146,40 +146,5 @@ function render() {
   
   const bd = document.getElementById('breakdown');
   bd.innerHTML = Object.keys(CAT_COLORS).map(cat => {
-    const amt = bycat[cat] || 0;
-    const pct = total > 0 ? (amt / total * 100) : 0;
-    return `<div class="breakdown-row">
-      <span style="width:90px;font-size:13px;">${cat}</span>
-      <div class="bar-wrap"><div class="bar-fill" style="width:${pct}%;background:${CAT_COLORS[cat].bar}"></div></div>
-      <span style="width:40px;text-align:right;font-family:monospace;font-size:12px;">${pct.toFixed(0)}%</span>
-    </div>`;
-  }).join('');
-
-  const lw = document.getElementById('log-wrap');
-  const sorted = [...entries].sort((a,b) => new Date(b.rawDate) - new Date(a.rawDate));
-  lw.innerHTML = `<table class="log-table">
-    <thead><tr><th>Date</th><th>Cat</th><th>Note</th><th>Amt</th><th></th></tr></thead>
-    <tbody>${sorted.map(e => `<tr>
-      <td>${e.date}</td>
-      <td><span class="cat-badge" style="background:${CAT_COLORS[e.category].bg};color:${CAT_COLORS[e.category].text}">${e.category}</span></td>
-      <td>${e.note || '—'}</td>
-      <td style="font-family:monospace">$${e.amount.toFixed(2)}</td>
-      <td><button class="del-btn" onclick="deleteEntry(${e.id})">×</button></td>
-    </tr>`).join('')}</tbody>
-  </table>`;
-}
-
-function exportCSV() {
-  let csv = 'Date,Category,Note,Amount\n' + entries.map(e => `"${e.date}","${e.category}","${e.note}","${e.amount}"`).join('\n');
-  const blob = new Blob([csv], { type: 'text/csv' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'cash-log.csv';
-  a.click();
-}
-
-setNow();
-render();
-</script>
-</body>
-</html>
+    const amt = bycat
+ 
