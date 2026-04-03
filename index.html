@@ -24,15 +24,15 @@
   .form-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-end; }
   .form-group { display: flex; flex-direction: column; gap: 5px; }
   input, select { height: 38px; padding: 0 10px; border: 1px solid #d0c8bc; border-radius: 5px; background: #faf8f4; font-size: 14px; }
-  .btn { height: 38px; padding: 0 18px; border: 1px solid #1a1a1a; border-radius: 5px; background: #1a1a1a; color: #f5f0e8; cursor: pointer; }
+  .btn { height: 38px; padding: 0 18px; border: 1px solid #1a1a1a; border-radius: 5px; background: #1a1a1a; color: #f5f0e8; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; }
+  .btn-outline { background: #eee !important; color: #1a1a1a !important; border: 1px solid #d0c8bc !important; font-size: 11px; font-weight: bold; }
   .log-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 10px; }
   .log-table td, .log-table th { padding: 9px 8px; border-bottom: 1px solid #f0ebe2; text-align: left; }
   .cat-badge { padding: 2px 8px; border-radius: 10px; font-size: 11px; font-family: monospace; }
   .bar-wrap { flex: 1; height: 10px; background: #ede8df; border-radius: 10px; overflow: hidden; margin: 0 10px; }
   .bar-fill { height: 100%; transition: width 0.4s; }
   .breakdown-row { display: flex; align-items: center; margin-bottom: 10px; }
-  .del-btn { color: #ccc; border: none; background: none; cursor: pointer; font-size: 16px; font-weight: bold; }
-  .del-btn:hover { color: #b34a00; }
+  .del-btn { color: #ccc; border: none; background: none; cursor: pointer; font-size: 18px; padding: 0 5px; }
   .history-item { display: flex; justify-content: space-between; font-size: 13px; padding: 8px 0; border-bottom: 1px solid #f0ebe2; }
   @media (max-width: 600px) { .metrics { grid-template-columns: 1fr; } .form-row { flex-direction: column; align-items: stretch; } }
 </style>
@@ -45,31 +45,4 @@
   <div class="metrics">
     <div class="metric"><div class="metric-label">Total Spent</div><div class="metric-value spent" id="total">€0.00</div></div>
     <div class="metric"><div class="metric-label">Entries</div><div class="metric-value" id="count">0</div></div>
-    <div class="metric"><div class="metric-label">Status</div><div class="metric-value" id="status" style="font-size:14px; color:green;">Active</div></div>
-  </div>
-
-  <div class="card">
-    <div class="card-title">Add Expense</div>
-    <div class="form-row">
-      <div class="form-group"><label style="font-size:12px;">Date</label><input type="datetime-local" id="datetime"></div>
-      <div class="form-group"><label style="font-size:12px;">Amount (€)</label><input type="number" id="amount" step="0.01"></div>
-      <div class="form-group">
-        <label style="font-size:12px;">Category</label>
-        <select id="category">
-          <option value="Groceries">🛒 Groceries</option>
-          <option value="Coffee">☕ Coffee</option>
-          <option value="Tobacco">🚬 Tobacco</option>
-          <option value="Drinks">🍺 Drinks</option>
-          <option value="Random">🎲 Random</option>
-        </select>
-      </div>
-      <button class="btn" onclick="addEntry()">Add</button>
-    </div>
-  </div>
-
-  <div class="card"><div class="card-title">Breakdown</div><div id="breakdown"></div></div>
-
-  <div class="card">
-    <div class="card-title">Log</div>
-    <div id="log-wrap"></div>
-    <div
+    <div class="metric"><div class="metric-label">Status</div><div class="metric-value" id="status" style="font-size:14px; color
