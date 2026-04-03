@@ -31,6 +31,9 @@
   .bar-wrap { flex: 1; height: 10px; background: #ede8df; border-radius: 10px; overflow: hidden; margin: 0 10px; }
   .bar-fill { height: 100%; transition: width 0.4s; }
   .breakdown-row { display: flex; align-items: center; margin-bottom: 10px; }
+  .del-btn { color: #ccc; border: none; background: none; cursor: pointer; font-size: 16px; font-weight: bold; }
+  .del-btn:hover { color: #b34a00; }
+  .history-item { display: flex; justify-content: space-between; font-size: 13px; padding: 8px 0; border-bottom: 1px solid #f0ebe2; }
   @media (max-width: 600px) { .metrics { grid-template-columns: 1fr; } .form-row { flex-direction: column; align-items: stretch; } }
 </style>
 </head>
@@ -69,85 +72,4 @@
   <div class="card">
     <div class="card-title">Log</div>
     <div id="log-wrap"></div>
-    <div style="margin-top:20px; display:flex; justify-content:space-between;">
-      <button onclick="clearAll()" style="color:#999; border:none; background:none; cursor:pointer; font-size:11px;">CLEAR ALL</button>
-      <button onclick="exportCSV()" style="color:#1a1a1a; font-weight:bold; border:none; background:none; cursor:pointer; font-size:11px;">EXPORT CSV</button>
-    </div>
-  </div>
-</div>
-
-<script>
-const COLORS = {
-  Groceries: '#5a8a5a', Coffee: '#c8813a', Tobacco: '#8a7a6a', Drinks: '#4a6a9a', Random: '#9a5a8a'
-};
-
-let entries = JSON.parse(localStorage.getItem('cashEntries') || '[]');
-
-function setNow() {
-  const n = new Date();
-  n.setMinutes(n.getMinutes() - n.getTimezoneOffset());
-  document.getElementById('datetime').value = n.toISOString().slice(0, 16);
-}
-
-function addEntry() {
-  const amt = parseFloat(document.getElementById('amount').value);
-  if (!amt) return alert("Enter an amount");
-
-  const entry = {
-    id: Date.now(),
-    amount: amt,
-    category: document.getElementById('category').value,
-    date: document.getElementById('datetime').value
-  };
-
-  entries.push(entry);
-  localStorage.setItem('cashEntries', JSON.stringify(entries));
-  document.getElementById('amount').value = '';
-  render();
-}
-
-function clearAll() { if(confirm("Delete everything?")) { entries=[]; localStorage.removeItem('cashEntries'); render(); } }
-
-function render() {
-  const total = entries.reduce((s, e) => s + e.amount, 0);
-  document.getElementById('total').textContent = '€' + total.toFixed(2);
-  document.getElementById('count').textContent = entries.length;
-
-  const byCat = {};
-  entries.forEach(e => byCat[e.category] = (byCat[e.category] || 0) + e.amount);
-
-  document.getElementById('breakdown').innerHTML = Object.keys(COLORS).map(cat => {
-    const amt = byCat[cat] || 0;
-    const pct = total > 0 ? (amt / total * 100) : 0;
-    return `<div class="breakdown-row">
-      <span style="width:80px; font-size:12px;">${cat}</span>
-      <div class="bar-wrap"><div class="bar-fill" style="width:${pct}%; background:${COLORS[cat]}"></div></div>
-      <span style="width:40px; text-align:right; font-size:12px;">${pct.toFixed(0)}%</span>
-    </div>`;
-  }).join('');
-
-  const log = document.getElementById('log-wrap');
-  const sorted = [...entries].sort((a,b) => new Date(b.date) - new Date(a.date));
-  log.innerHTML = `<table class="log-table">
-    ${sorted.map(e => `<tr>
-      <td>${e.date.split('T')[0]}</td>
-      <td><span class="cat-badge" style="background:#eee;">${e.category}</span></td>
-      <td style="font-weight:bold;">€${e.amount.toFixed(2)}</td>
-    </tr>`).join('')}
-  </table>`;
-}
-
-function exportCSV() {
-  const csv = "Date,Category,Amount\n" + entries.map(e => `${e.date},${e.category},${e.amount}`).join("\n");
-  const blob = new Blob([csv], { type: 'text/csv' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'cash_tracker.csv';
-  a.click();
-}
-
-setNow();
-render();
-</script>
-</body>
-</html>
+    <div
