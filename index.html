@@ -31,8 +31,9 @@
   .btn-sub { background: #fff; color: #1a1a1a; border: 1px solid #d0c8bc; font-size: 11px; height: 38px; padding: 0 15px; border-radius: 5px; cursor: pointer; }
 
   .log-table { width: 100%; border-collapse: collapse; font-size: 14px; }
-  .log-table td { padding: 12px 0; border-bottom: 1px solid #f0ebe2; }
+  .log-table td { padding: 12px 0; border-bottom: 1px solid #f0ebe2; vertical-align: top; }
   .cat-badge { padding: 3px 10px; border-radius: 12px; font-size: 11px; font-family: monospace; background: #eee; }
+  .note-text { display: block; font-size: 11px; color: #777; font-style: italic; margin-top: 4px; }
   .del-x { color: #ccc; border: none; background: none; font-size: 20px; cursor: pointer; padding-left: 10px; line-height: 1; }
 
   .breakdown-row { display: flex; align-items: center; margin-bottom: 12px; font-size: 12px; }
@@ -70,6 +71,7 @@
         <option value="Random">🎲 Random</option>
       </select>
     </div>
+    <div class="form-group"><label>Note (Optional)</label><input type="text" id="note" placeholder="What was it for?"></div>
     <button class="btn-add" onclick="addEntry()">Add</button>
   </div>
 
@@ -111,8 +113,19 @@ function addEntry() {
   const amtVal = document.getElementById('amount').value;
   const amt = parseFloat(amtVal);
   if (!amt) return;
-  entries.push({ id: Date.now(), amount: amt, category: document.getElementById('category').value, date: document.getElementById('datetime').value });
-  save(); document.getElementById('amount').value = ''; render();
+  
+  entries.push({ 
+    id: Date.now(), 
+    amount: amt, 
+    category: document.getElementById('category').value, 
+    date: document.getElementById('datetime').value,
+    note: document.getElementById('note').value.trim() 
+  });
+  
+  save(); 
+  document.getElementById('amount').value = ''; 
+  document.getElementById('note').value = '';
+  render();
 }
 
 function deleteEntry(id) { if (confirm("Delete entry?")) { entries = entries.filter(e => e.id !== id); save(); render(); } }
@@ -132,7 +145,16 @@ function render() {
   }).join('');
 
   const sorted = [...entries].sort((a,b) => new Date(b.date) - new Date(a.date));
-  document.getElementById('log-wrap').innerHTML = `<table class="log-table">${sorted.map(e => `<tr><td>${e.date.split('T')[0]}</td><td><span class="cat-badge">${e.category}</span></td><td style="font-weight:bold; text-align:right;">€${e.amount.toFixed(2)}</td><td style="text-align:right;"><button class="del-x" onclick="deleteEntry(${e.id})">×</button></td></tr>`).join('')}</table>`;
+  document.getElementById('log-wrap').innerHTML = `<table class="log-table">${sorted.map(e => `
+    <tr>
+      <td>${e.date.split('T')[0]}</td>
+      <td>
+        <span class="cat-badge">${e.category}</span>
+        ${e.note ? `<span class="note-text">${e.note}</span>` : ''}
+      </td>
+      <td style="font-weight:bold; text-align:right;">€${e.amount.toFixed(2)}</td>
+      <td style="text-align:right;"><button class="del-x" onclick="deleteEntry(${e.id})">×</button></td>
+    </tr>`).join('')}</table>`;
 
   const byDay = {};
   entries.forEach(e => { const d = e.date.split('T')[0]; byDay[d] = (byDay[d] || 0) + e.amount; });
@@ -141,7 +163,7 @@ function render() {
 }
 
 function exportCSV() {
-  const csv = "Date,Category,Amount\n" + entries.map(e => `${e.date},${e.category},${e.amount}`).join("\n");
+  const csv = "Date,Category,Amount,Note\n" + entries.map(e => `${e.date},${e.category},${e.amount},"${(e.note || '').replace(/"/g, '""')}"`).join("\n");
   const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' })); a.download = 'cash_tracker_backup.csv'; a.click();
 }
 
@@ -152,12 +174,22 @@ function importCSV(input) {
       const rows = e.target.result.split('\n').slice(1).filter(r => r.trim());
       const imported = rows.map(r => { 
         const p = r.split(','); 
-        return { id: Date.now() + Math.random(), date: p[0].trim(), category: p[1].trim(), amount: parseFloat(p[2]) }; 
+        return { 
+          id: Date.now() + Math.random(), 
+          date: p[0].trim(), 
+          category: p[1].trim(), 
+          amount: parseFloat(p[2]),
+          note: p[3] ? p[3].replace(/"/g, '').trim() : ''
+        }; 
       });
       if(confirm(`Import ${imported.length} items?`)) { entries = [...entries, ...imported]; save(); render(); }
     } catch(err) { alert("Invalid CSV format."); }
   };
   reader.readAsText(input.files[0]);
+}
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js');
 }
 
 setNow(); render();
